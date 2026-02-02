@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>沈星回．星光備忘錄</title>
+    <style>
+        :root {
+            --star-purple: #e0d7ff;
+            --deep-purple: #9a8cff;
+            --text-color: #4a4a4a;
+            --soft-white: rgba(255, 255, 255, 0.85);
+        }
+
+        body {
+            font-family: "Microsoft JhengHei", sans-serif;
+            background: linear-gradient(135deg, #f5f3ff 0%, #e0d7ff 100%);
+            color: var(--text-color);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            min-height: 120vh;
+            /* 修改重點：大幅增加底部留白至 500px，確保月曆絕對不會被擋住 */
+            padding-bottom: 600px; 
+        }
+
+        .container {
+            width: 90%;
+            max-width: 500px;
+            margin-top: 30px;
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--deep-purple);
+            text-shadow: 1px 1px 2px white;
+            margin-bottom: 30px;
+        }
+
+        .section {
+            background: var(--soft-white);
+            border-radius: 15px;
+            padding: 20px;
+            /* 修改重點：增加區塊間距，拉長網站視覺 */
+            margin-bottom: 50px; 
+            box-shadow: 0 6px 15px rgba(0,0,0,0.05);
+            backdrop-filter: blur(5px);
+        }
+
+        h2 {
+            font-size: 1.1rem;
+            border-left: 4px solid var(--deep-purple);
+            padding-left: 10px;
+            margin-top: 0;
+            margin-bottom: 15px;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
+        input[type="text"], input[type="date"] {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            flex-grow: 1;
+            font-family: inherit;
+        }
+
+        button {
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .add-btn {
+            background: var(--deep-purple);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+        }
+        
+        .add-btn:hover { background: #8575ff; }
+
+        .task-item, .count-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px dashed #ccc;
+        }
+
+        .completed { text-decoration: line-through; color: #888; }
+
+        .delete-btn {
+            background: #ff8b8b;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            padding: 4px 10px;
+            font-size: 0.8rem;
+        }
+
+        .today-highlight {
+            color: #d4a5ff;
+            font-weight: bold;
+            text-shadow: 0 0 5px white;
+        }
+
+        /* 心情按鈕區 */
+        .mood-selector {
+            margin-bottom: 15px;
+        }
+        .mood-group {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+        .mood-btn {
+            border: 1px solid var(--deep-purple);
+            background: white;
+            padding: 8px;
+            border-radius: 8px;
+            font-size: 0.95rem;
+        }
+        .mood-btn:hover { 
+            background: var(--star-purple); 
+            transform: translateY(-2px);
+        }
+
+        /* 月曆樣式 */
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: var(--deep-purple);
+        }
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+            text-align: center;
+        }
+        .calendar-day-header {
+            font-size: 0.8rem;
+            color: #888;
+            padding-bottom: 5px;
+        }
+        .calendar-cell {
+            background: rgba(255,255,255,0.5);
+            aspect-ratio: 1; /* 保持正方形 */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-radius: 5px;
+            font-size: 0.8rem;
+            position: relative;
+        }
+        .calendar-cell.today {
+            border: 2px solid var(--deep-purple);
+        }
+        .mood-icon {
+            font-size: 1.2rem;
+            margin-top: 2px;
+        }
+
+        .random-box {
+            background: #fff;
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid var(--star-purple);
+            text-align: center;
+            min-height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 10px;
+            line-height: 1.5;
+        }
+
+        /* 沈星回區域 */
+        .character-zone {
+            position: fixed;
+            left: 20px;
+            bottom: 20px;
+            display: flex;
+            align-items: flex-end;
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        .avatar {
+            width: 110px;
+            height: 110px;
+            background-image: url('1234.jpg'); 
+            background-size: cover;
+            background-position: center;
+            cursor: pointer;
+            pointer-events: auto;
+            border-radius: 50%;
+            border: 4px solid white; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            transition: transform 0.3s;
+        }
+        
+        .avatar:hover { transform: scale(1.05); }
+
+        .bubble {
+            background: white;
+            border: 2px solid var(--deep-purple);
+            padding: 12px 18px;
+            border-radius: 15px;
+            margin-bottom: 60px;
+            margin-left: 15px;
+            max-width: 220px;
+            position: relative;
+            box-shadow: 2px 2px 10px rgba(0,0,0,0.1);
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        .bubble::after {
+            content: '';
+            position: absolute;
+            left: -10px;
+            bottom: 15px;
+            border-width: 10px 10px 10px 0;
+            border-style: solid;
+            border-color: transparent white transparent transparent;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>✨ 星光備忘錄 ✨</h1>
+
+    <div class="section">
+        <h2>沈星回的小任務</h2>
+        <button class="add-btn" style="width: 100%;" onclick="getRandomTask()">獲取今日隨機星光任務</button>
+        <div class="random-box" id="taskDisplay">點擊按鈕，接取我的小任務吧。</div>
+    </div>
+
+    <div class="section">
+        <h2>週年倒數</h2>
+        <div class="input-group">
+            <input type="text" id="countName" placeholder="紀念日名稱...">
+            <input type="date" id="countDate">
+            <button class="add-btn" onclick="addCountdown()">紀錄</button>
+        </div>
+        <div id="countdownList"></div>
+    </div>
+
+    <div class="section">
+        <h2>每日目標</h2>
+        <div class="input-group">
+            <input type="text" id="dailyInput" placeholder="輸入今日目標...">
+            <button class="add-btn" onclick="addTask('daily')">新增</button>
+        </div>
+        <div id="dailyList"></div>
+    </div>
+
+    <div class="section">
+        <h2>心情記錄</h2>
+        <div class="mood-selector">
+            <label style="font-size:0.9rem; color:#666;">選擇日期：</label>
+            <input type="date" id="moodDate" style="margin-bottom: 10px;">
+        </div>
+        <div class="mood-group">
+            <button class="mood-btn" onclick="recordMood('開心')">😊 開心</button>
+            <button class="mood-btn" onclick="recordMood('興奮')">🤩 興奮</button>
+            <button class="mood-btn" onclick="recordMood('難過')">😢 難過</button>
+            <button class="mood-btn" onclick="recordMood('好累')">😫 好累</button>
+            <button class="mood-btn" onclick="recordMood('生氣')">💢 生氣</button>
+            <button class="mood-btn" onclick="recordMood('平靜')">😌 平靜</button>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>心情月曆</h2>
+        <div class="calendar-header">
+            <button class="add-btn" style="padding: 2px 8px;" onclick="changeMonth(-1)">❮</button>
+            <span id="calendarMonthYear"></span>
+            <button class="add-btn" style="padding: 2px 8px;" onclick="changeMonth(1)">❯</button>
+        </div>
+        <div class="calendar-grid">
+            <div class="calendar-day-header">日</div>
+            <div class="calendar-day-header">一</div>
+            <div class="calendar-day-header">二</div>
+            <div class="calendar-day-header">三</div>
+            <div class="calendar-day-header">四</div>
+            <div class="calendar-day-header">五</div>
+            <div class="calendar-day-header">六</div>
+        </div>
+        <div class="calendar-grid" id="calendarBody"></div>
+    </div>
+</div>
+
+<div class="character-zone">
+    <div class="avatar" onclick="saySomething('touch')"></div>
+    <div class="bubble" id="dialogue">...</div>
+</div>
+
+<script>
+    // 資料初始化
+    let dailyTasks = JSON.parse(localStorage.getItem('dailyTasks')) || [];
+    let countdowns = JSON.parse(localStorage.getItem('countdowns')) || [];
+    let moodHistory = JSON.parse(localStorage.getItem('moodHistory')) || {}; // 格式: { "2023-10-01": "開心" }
+
+    // 當前月曆顯示的日期
+    let currentCalendarDate = new Date();
+
+    // 預設心情日期為今天
+    document.getElementById('moodDate').valueAsDate = new Date();
+
+    const moodIcons = {
+        "開心": "😊",
+        "興奮": "🤩",
+        "難過": "😢",
+        "好累": "😫",
+        "生氣": "💢",
+        "平靜": "😌"
+    };
+
+    const dialogues = {
+        touch: ["嗯... 妳在找我嗎？", "別擔心，我一直都在妳身邊。", "光芒會指引妳前進的方向。", "想去哪裡？我陪妳。"],
+        add: ["新的計劃嗎？我會陪妳一起完成的。", "記好了，這件事對妳很重要對吧？"],
+        complete: ["妳做得很好，辛苦了。", "妳果然很出色，要給妳一點獎勵嗎？"],
+        "開心": ["看到妳這麼開心，光芒好像都變亮了。", "只要妳高興，我也會覺得心情很好。"],
+        "興奮": ["發生什麼好事了？慢慢說，我聽著。", "妳眼睛裡有星星在閃。"],
+        "難過": ["想哭就哭吧，我在，不會離開。", "沒事的，我會一直陪著妳，直到妳好起來。"],
+        "好累": ["辛苦了，先休息一下吧，我守著妳。", "就是這樣，把頭靠在我的肩膀上，睡吧。"],
+        "生氣": ["誰惹妳生氣了？要去幫妳教訓他嗎？", "深呼吸，有我在這，不氣了。"],
+        "平靜": ["這樣安安靜靜的時刻，感覺很舒服。", "平凡的日子，只要有妳在就很特別。"],
+        "countdown": ["這一天不知不覺快到了呢。", "對妳來說是很重要的日子吧？我會記下來的。", "那一天，我們會一起度過嗎？"]
+    };
+
+    const randomTasks = [
+        "今天多喝一點水，照顧好身體。",
+        "抬頭看看天空，找一顆最亮的星星。",
+        "給自己五分鐘，靜下心來什麼都別想。",
+        "對鏡子裡的自己笑一個。",
+        "今天早十分鐘躺到床上休息。",
+        "吃一點甜的東西，讓心情變好。",
+        "聽一首妳最喜歡的歌。",
+        "深呼吸三次，把不愉快都吐出來。",
+        "今天試著多稱讚自己一點。",
+        "如果累了就閉上眼，我在妳身邊。"
+    ];
+
+    // --- 核心功能 ---
+
+    function saySomething(type) {
+        const bubble = document.getElementById('dialogue');
+        const options = dialogues[type];
+        const randomText = options[Math.floor(Math.random() * options.length)];
+        bubble.innerText = randomText;
+        bubble.style.opacity = 1;
+        setTimeout(() => { bubble.style.opacity = 0; }, 4000);
+    }
+
+    // --- 心情與月曆功能 ---
+
+    function recordMood(mood) {
+        const dateInput = document.getElementById('moodDate').value;
+        if (!dateInput) return;
+
+        // 儲存心情
+        moodHistory[dateInput] = mood;
+        localStorage.setItem('moodHistory', JSON.stringify(moodHistory));
+
+        // 觸發對話 & 重新渲染月曆
+        saySomething(mood);
+        renderCalendar();
+    }
+
+    function changeMonth(delta) {
+        currentCalendarDate.setMonth(currentCalendarDate.getMonth() + delta);
+        renderCalendar();
+    }
+
+    function renderCalendar() {
+        const year = currentCalendarDate.getFullYear();
+        const month = currentCalendarDate.getMonth();
+        const firstDay = new Date(year, month, 1).getDay();
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        
+        document.getElementById('calendarMonthYear').innerText = `${year}年 ${month + 1}月`;
+        
+        const calendarBody = document.getElementById('calendarBody');
+        calendarBody.innerHTML = '';
+
+        // 填充空白日
+        for (let i = 0; i < firstDay; i++) {
+            calendarBody.innerHTML += `<div></div>`;
+        }
+
+        // 填充日期
+        for (let day = 1; day <= daysInMonth; day++) {
+            // 格式化日期 key (YYYY-MM-DD) 注意月份要補0
+            const monthStr = String(month + 1).padStart(2, '0');
+            const dayStr = String(day).padStart(2, '0');
+            const dateKey = `${year}-${monthStr}-${dayStr}`;
+            
+            // 檢查是否有心情紀錄
+            const mood = moodHistory[dateKey];
+            const icon = mood ? moodIcons[mood] : '';
+            
+            // 檢查是否是今天
+            const today = new Date();
+            const isToday = (day === today.getDate() && month === today.getMonth() && year === today.getFullYear()) ? 'today' : '';
+
+            calendarBody.innerHTML += `
+                <div class="calendar-cell ${isToday}">
+                    <span>${day}</span>
+                    <span class="mood-icon">${icon}</span>
+                </div>
+            `;
+        }
+    }
+
+    // --- 其他功能 (任務 & 倒數) ---
+
+    function getRandomTask() {
+        const task = randomTasks[Math.floor(Math.random() * randomTasks.length)];
+        document.getElementById('taskDisplay').innerText = task;
+        saySomething('add');
+    }
+
+    function addCountdown() {
+        const name = document.getElementById('countName');
+        const dateInput = document.getElementById('countDate');
+        if (!name.value || !dateInput.value) return;
+        
+        const dateObj = new Date(dateInput.value);
+        countdowns.push({ 
+            name: name.value, 
+            month: dateObj.getMonth() + 1, 
+            day: dateObj.getDate() 
+        });
+        
+        name.value = '';
+        dateInput.value = '';
+        saySomething('countdown');
+        saveAndRender();
+    }
+
+    function addTask(type) {
+        const input = document.getElementById('dailyInput');
+        if (!input.value) return;
+        dailyTasks.push({ text: input.value, completed: false });
+        input.value = '';
+        saySomething('add');
+        saveAndRender();
+    }
+
+    function toggleTask(index) {
+        dailyTasks[index].completed = !dailyTasks[index].completed;
+        if (dailyTasks[index].completed) saySomething('complete');
+        saveAndRender();
+    }
+
+    function deleteTask(type, index) {
+        if (type === 'daily') dailyTasks.splice(index, 1);
+        else countdowns.splice(index, 1);
+        saveAndRender();
+    }
+
+    function saveAndRender() {
+        localStorage.setItem('dailyTasks', JSON.stringify(dailyTasks));
+        localStorage.setItem('countdowns', JSON.stringify(countdowns));
+        renderList();
+    }
+
+    function renderList() {
+        // 每日任務
+        document.getElementById('dailyList').innerHTML = dailyTasks.map((t, i) => `
+            <div class="task-item">
+                <label class="${t.completed ? 'completed' : ''}">
+                    <input type="checkbox" ${t.completed ? 'checked' : ''} onchange="toggleTask(${i})">
+                    ${t.text}
+                </label>
+                <button class="delete-btn" onclick="deleteTask('daily', ${i})">刪除</button>
+            </div>
+        `).join('');
+
+        // 週年倒數
+        const now = new Date();
+        const currentYear = now.getFullYear();
+        document.getElementById('countdownList').innerHTML = countdowns.map((c, i) => {
+            let target = new Date(currentYear, c.month - 1, c.day);
+            if (target.setHours(0,0,0,0) < now.setHours(0,0,0,0)) {
+                target = new Date(currentYear + 1, c.month - 1, c.day);
+            }
+            const diffTime = target.setHours(0,0,0,0) - now.setHours(0,0,0,0);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            
+            let displayText = diffDays === 0 
+                ? `<span class="today-highlight">✨ 就是今天 ✨</span>` 
+                : `還有 ${diffDays} 天`;
+
+            return `
+                <div class="count-item">
+                    <span><strong>${c.name}</strong> (${c.month}/${c.day})：${displayText}</span>
+                    <button class="delete-btn" onclick="deleteTask('count', ${i})">刪除</button>
+                </div>
+            `;
+        }).join('');
+    }
+
+    // 初始化執行
+    renderList();
+    renderCalendar();
+</script>
+
+</body>
+</html>
