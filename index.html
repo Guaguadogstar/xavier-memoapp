@@ -5,10 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>沈星回．星光備忘錄</title>
     <style>
-        /* 全域設定：這行非常重要，確保 padding 不會把寬度撐爆 */
-        * {
-            box-sizing: border-box;
-        }
+        /* 全域設定 */
+        * { box-sizing: border-box; }
 
         :root {
             --star-purple: #e0d7ff;
@@ -25,15 +23,14 @@
             display: flex;
             justify-content: center;
             min-height: 100vh;
-            /* 底部留白，確保滑到底部時不會被沈星回擋住 */
             padding-bottom: 300px; 
         }
 
         .container {
-            width: 100%; /* 手機版佔滿 */
-            max-width: 600px; /* 電腦版最大寬度 */
+            width: 100%;
+            max-width: 600px;
             margin-top: 20px;
-            padding: 0 15px; /* 容器左右留一點點緩衝 */
+            padding: 0 15px;
         }
 
         h1 {
@@ -47,7 +44,6 @@
         .section {
             background: var(--soft-white);
             border-radius: 15px;
-            /* 電腦版預設間距 */
             padding: 25px 25px; 
             margin-bottom: 30px; 
             box-shadow: 0 6px 15px rgba(0,0,0,0.05);
@@ -75,13 +71,13 @@
             border-radius: 5px;
             flex-grow: 1;
             font-family: inherit;
-            min-width: 0; /* 防止輸入框在小螢幕撐爆 */
+            min-width: 0;
         }
 
         button {
             cursor: pointer;
             transition: 0.2s;
-            white-space: nowrap; /* 防止按鈕文字換行 */
+            white-space: nowrap;
         }
 
         .add-btn {
@@ -141,11 +137,9 @@
             justify-content: center;
             gap: 5px;
         }
-        .mood-btn:hover { 
-            background: var(--star-purple); 
-        }
+        .mood-btn:hover { background: var(--star-purple); }
 
-        /* --- 月曆樣式 --- */
+        /* 月曆樣式 */
         .calendar-header {
             display: flex;
             justify-content: space-between;
@@ -160,7 +154,6 @@
         .calendar-grid-container {
             display: grid;
             grid-template-columns: repeat(7, 1fr); 
-            /* 電腦版間距 */
             gap: 6px; 
             text-align: center;
         }
@@ -198,10 +191,7 @@
             color: var(--deep-purple);
         }
 
-        .mood-icon {
-            font-size: 1.1rem;
-            margin-top: 2px;
-        }
+        .mood-icon { font-size: 1.1rem; margin-top: 2px; }
 
         .random-box {
             background: #fff;
@@ -217,7 +207,7 @@
             line-height: 1.5;
         }
 
-        /* --- 沈星回區域 --- */
+        /* 沈星回區域 */
         .character-zone {
             position: fixed;
             left: 15px;
@@ -225,11 +215,10 @@
             display: flex;
             align-items: flex-end;
             pointer-events: none;
-            z-index: 9999; /* 最高層級 */
+            z-index: 9999;
         }
 
         .avatar {
-            /* 電腦版尺寸 */
             width: 110px;
             height: 110px;
             background-image: url('1234.jpg'); 
@@ -250,7 +239,7 @@
             border: 2px solid var(--deep-purple);
             padding: 10px 15px;
             border-radius: 15px;
-            margin-bottom: 50px; /* 讓對話框高一點 */
+            margin-bottom: 50px;
             margin-left: 10px;
             max-width: 200px;
             position: relative;
@@ -282,51 +271,16 @@
             z-index: -1;
         }
 
-        /* ========================================= */
-        /* ★★★ 手機版專用調整 (Media Query) ★★★ */
-        /* ========================================= */
+        /* 手機版 RWD */
         @media (max-width: 480px) {
-            /* 1. 減少區塊內距，把空間留給內容 */
-            .section {
-                padding: 20px 12px; 
-            }
-
-            /* 2. 縮小月曆格子間距 */
-            .calendar-grid-container {
-                gap: 3px; 
-            }
-
-            /* 3. 稍微縮小格子內文字與圖示 */
-            .grid-cell {
-                font-size: 0.8rem;
-                border-radius: 5px;
-            }
-            .mood-icon {
-                font-size: 0.9rem;
-            }
-
-            /* 4. 縮小沈星回頭像，避免擋住太多畫面 */
-            .avatar {
-                width: 85px;
-                height: 85px;
-                border-width: 3px;
-            }
-            
-            /* 5. 調整心情按鈕間距 */
-            .mood-group {
-                gap: 6px;
-            }
-            .mood-btn {
-                font-size: 0.8rem;
-                padding: 8px 2px;
-            }
-
-            /* 6. 調整對話框位置 */
-            .bubble {
-                margin-bottom: 40px;
-                max-width: 160px;
-                font-size: 0.85rem;
-            }
+            .section { padding: 20px 12px; }
+            .calendar-grid-container { gap: 3px; }
+            .grid-cell { font-size: 0.8rem; border-radius: 5px; }
+            .mood-icon { font-size: 0.9rem; }
+            .avatar { width: 85px; height: 85px; border-width: 3px; }
+            .mood-group { gap: 6px; }
+            .mood-btn { font-size: 0.8rem; padding: 8px 2px; }
+            .bubble { margin-bottom: 40px; max-width: 160px; font-size: 0.85rem; }
         }
     </style>
 </head>
@@ -342,6 +296,24 @@
     </div>
 
     <div class="section">
+        <h2>每日目標 (自動重置)</h2>
+        <div class="input-group">
+            <input type="text" id="repeatInput" placeholder="例如：喝水2000cc...">
+            <button class="add-btn" onclick="addRepeatTask()">新增</button>
+        </div>
+        <div id="repeatList"></div>
+    </div>
+
+    <div class="section">
+        <h2>小目標</h2>
+        <div class="input-group">
+            <input type="text" id="oneTimeInput" placeholder="輸入待完成的目標...">
+            <button class="add-btn" onclick="addOneTimeTask()">新增</button>
+        </div>
+        <div id="oneTimeList"></div>
+    </div>
+
+    <div class="section">
         <h2>週年倒數</h2>
         <div class="input-group">
             <input type="text" id="countName" placeholder="紀念日名稱...">
@@ -349,15 +321,6 @@
             <button class="add-btn" onclick="addCountdown()">紀錄</button>
         </div>
         <div id="countdownList"></div>
-    </div>
-
-    <div class="section">
-        <h2>每日目標</h2>
-        <div class="input-group">
-            <input type="text" id="dailyInput" placeholder="輸入今日目標...">
-            <button class="add-btn" onclick="addTask('daily')">新增</button>
-        </div>
-        <div id="dailyList"></div>
     </div>
 
     <div class="section">
@@ -395,9 +358,19 @@
 
 <script>
     // 資料初始化
-    let dailyTasks = JSON.parse(localStorage.getItem('dailyTasks')) || [];
+    let repeatTasks = JSON.parse(localStorage.getItem('repeatTasks')) || [];
+    let oneTimeTasks = JSON.parse(localStorage.getItem('oneTimeTasks')) || [];
     let countdowns = JSON.parse(localStorage.getItem('countdowns')) || [];
     let moodHistory = JSON.parse(localStorage.getItem('moodHistory')) || {}; 
+    let lastVisitDate = localStorage.getItem('lastVisitDate');
+
+    // 檢查是否跨日，如果是，重置「每日目標」的打勾狀態
+    const todayStr = new Date().toDateString();
+    if (lastVisitDate !== todayStr) {
+        repeatTasks.forEach(task => task.completed = false); // 重置完成狀態
+        localStorage.setItem('repeatTasks', JSON.stringify(repeatTasks));
+        localStorage.setItem('lastVisitDate', todayStr); // 更新最後訪問日期
+    }
 
     // 當前月曆顯示的日期
     let currentCalendarDate = new Date();
@@ -406,12 +379,8 @@
     document.getElementById('moodDate').valueAsDate = new Date();
 
     const moodIcons = {
-        "開心": "😊",
-        "興奮": "🤩",
-        "難過": "😢",
-        "好累": "😫",
-        "生氣": "💢",
-        "平靜": "😌"
+        "開心": "😊", "興奮": "🤩", "難過": "😢",
+        "好累": "😫", "生氣": "💢", "平靜": "😌"
     };
 
     const dialogues = {
@@ -428,16 +397,11 @@
     };
 
     const randomTasks = [
-        "今天多喝一點水，照顧好身體。",
-        "抬頭看看天空，找一顆最亮的星星。",
-        "給自己五分鐘，靜下心來什麼都別想。",
-        "對鏡子裡的自己笑一個。",
-        "今天早十分鐘躺到床上休息。",
-        "吃一點甜的東西，讓心情變好。",
-        "聽一首妳最喜歡的歌。",
-        "深呼吸三次，把不愉快都吐出來。",
-        "今天試著多稱讚自己一點。",
-        "如果累了就閉上眼，我在妳身邊。"
+        "今天多喝一點水，照顧好身體。", "抬頭看看天空，找一顆最亮的星星。",
+        "給自己五分鐘，靜下心來什麼都別想。", "對鏡子裡的自己笑一個。",
+        "今天早十分鐘躺到床上休息。", "吃一點甜的東西，讓心情變好。",
+        "聽一首妳最喜歡的歌。", "深呼吸三次，把不愉快都吐出來。",
+        "今天試著多稱讚自己一點。", "如果累了就閉上眼，我在妳身邊。"
     ];
 
     // --- 核心功能 ---
@@ -455,14 +419,9 @@
 
     function recordMood(mood) {
         const dateInput = document.getElementById('moodDate').value;
-        if (!dateInput) {
-            alert("請先選擇日期喔！");
-            return;
-        }
-
+        if (!dateInput) { alert("請先選擇日期喔！"); return; }
         moodHistory[dateInput] = mood;
         localStorage.setItem('moodHistory', JSON.stringify(moodHistory));
-
         saySomething(mood);
         renderCalendar();
     }
@@ -479,30 +438,19 @@
         const daysInMonth = new Date(year, month + 1, 0).getDate();
         
         document.getElementById('calendarMonthYear').innerText = `${year}年 ${month + 1}月`;
-        
         const calendarBody = document.getElementById('calendarBody');
         calendarBody.innerHTML = '';
 
-        // 1. 插入星期標題
         const weekDays = ['日', '一', '二', '三', '四', '五', '六'];
-        weekDays.forEach(day => {
-            calendarBody.innerHTML += `<div class="grid-cell grid-cell--header">${day}</div>`;
-        });
+        weekDays.forEach(day => { calendarBody.innerHTML += `<div class="grid-cell grid-cell--header">${day}</div>`; });
+        for (let i = 0; i < firstDay; i++) { calendarBody.innerHTML += `<div class="grid-cell grid-cell--day empty"></div>`; }
 
-        // 2. 插入空白佔位符
-        for (let i = 0; i < firstDay; i++) {
-            calendarBody.innerHTML += `<div class="grid-cell grid-cell--day empty"></div>`;
-        }
-
-        // 3. 插入日期
         for (let day = 1; day <= daysInMonth; day++) {
             const monthStr = String(month + 1).padStart(2, '0');
             const dayStr = String(day).padStart(2, '0');
             const dateKey = `${year}-${monthStr}-${dayStr}`;
-            
             const mood = moodHistory[dateKey];
             const icon = mood ? moodIcons[mood] : '';
-            
             const today = new Date();
             const isToday = (day === today.getDate() && month === today.getMonth() && year === today.getFullYear()) ? 'today' : '';
 
@@ -527,58 +475,83 @@
         const name = document.getElementById('countName');
         const dateInput = document.getElementById('countDate');
         if (!name.value || !dateInput.value) return;
-        
         const dateObj = new Date(dateInput.value);
-        countdowns.push({ 
-            name: name.value, 
-            month: dateObj.getMonth() + 1, 
-            day: dateObj.getDate() 
-        });
-        
-        name.value = '';
-        dateInput.value = '';
+        countdowns.push({ name: name.value, month: dateObj.getMonth() + 1, day: dateObj.getDate() });
+        name.value = ''; dateInput.value = '';
         saySomething('countdown');
         saveAndRender();
     }
 
-    function addTask(type) {
-        const input = document.getElementById('dailyInput');
+    // 新增每日目標 (重複)
+    function addRepeatTask() {
+        const input = document.getElementById('repeatInput');
         if (!input.value) return;
-        dailyTasks.push({ text: input.value, completed: false });
+        repeatTasks.push({ text: input.value, completed: false });
         input.value = '';
         saySomething('add');
         saveAndRender();
     }
 
-    function toggleTask(index) {
-        dailyTasks[index].completed = !dailyTasks[index].completed;
-        if (dailyTasks[index].completed) saySomething('complete');
+    // 新增小目標 (一次性)
+    function addOneTimeTask() {
+        const input = document.getElementById('oneTimeInput');
+        if (!input.value) return;
+        oneTimeTasks.push({ text: input.value, completed: false });
+        input.value = '';
+        saySomething('add');
+        saveAndRender();
+    }
+
+    // 切換狀態通用函數
+    function toggleTask(type, index) {
+        if (type === 'repeat') {
+            repeatTasks[index].completed = !repeatTasks[index].completed;
+            if (repeatTasks[index].completed) saySomething('complete');
+        } else if (type === 'oneTime') {
+            oneTimeTasks[index].completed = !oneTimeTasks[index].completed;
+            if (oneTimeTasks[index].completed) saySomething('complete');
+        }
         saveAndRender();
     }
 
     function deleteTask(type, index) {
-        if (type === 'daily') dailyTasks.splice(index, 1);
-        else countdowns.splice(index, 1);
+        if (type === 'repeat') repeatTasks.splice(index, 1);
+        else if (type === 'oneTime') oneTimeTasks.splice(index, 1);
+        else if (type === 'count') countdowns.splice(index, 1);
         saveAndRender();
     }
 
     function saveAndRender() {
-        localStorage.setItem('dailyTasks', JSON.stringify(dailyTasks));
+        localStorage.setItem('repeatTasks', JSON.stringify(repeatTasks));
+        localStorage.setItem('oneTimeTasks', JSON.stringify(oneTimeTasks));
         localStorage.setItem('countdowns', JSON.stringify(countdowns));
         renderList();
     }
 
     function renderList() {
-        document.getElementById('dailyList').innerHTML = dailyTasks.map((t, i) => `
+        // 渲染每日目標
+        document.getElementById('repeatList').innerHTML = repeatTasks.map((t, i) => `
             <div class="task-item">
                 <label class="${t.completed ? 'completed' : ''}" style="cursor:pointer; flex-grow:1;">
-                    <input type="checkbox" ${t.completed ? 'checked' : ''} onchange="toggleTask(${i})">
+                    <input type="checkbox" ${t.completed ? 'checked' : ''} onchange="toggleTask('repeat', ${i})">
                     ${t.text}
                 </label>
-                <button class="delete-btn" onclick="deleteTask('daily', ${i})">刪除</button>
+                <button class="delete-btn" onclick="deleteTask('repeat', ${i})">刪除</button>
             </div>
         `).join('');
 
+        // 渲染小目標
+        document.getElementById('oneTimeList').innerHTML = oneTimeTasks.map((t, i) => `
+            <div class="task-item">
+                <label class="${t.completed ? 'completed' : ''}" style="cursor:pointer; flex-grow:1;">
+                    <input type="checkbox" ${t.completed ? 'checked' : ''} onchange="toggleTask('oneTime', ${i})">
+                    ${t.text}
+                </label>
+                <button class="delete-btn" onclick="deleteTask('oneTime', ${i})">刪除</button>
+            </div>
+        `).join('');
+
+        // 渲染倒數
         const now = new Date();
         const currentYear = now.getFullYear();
         document.getElementById('countdownList').innerHTML = countdowns.map((c, i) => {
