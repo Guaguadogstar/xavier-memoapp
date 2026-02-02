@@ -2,14 +2,18 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>沈星回．星光備忘錄</title>
     <style>
+        /* 全域設定：這行非常重要，確保 padding 不會把寬度撐爆 */
+        * {
+            box-sizing: border-box;
+        }
+
         :root {
             --star-purple: #e0d7ff;
             --deep-purple: #9a8cff;
             --text-color: #4a4a4a;
-            /* 提高背景不透明度，避免滑動時內容混在一起 */
             --soft-white: rgba(255, 255, 255, 0.98); 
         }
 
@@ -21,30 +25,32 @@
             display: flex;
             justify-content: center;
             min-height: 100vh;
-            /* 底部留白，確保月曆不會被角色擋住 */
-            padding-bottom: 550px; 
+            /* 底部留白，確保滑到底部時不會被沈星回擋住 */
+            padding-bottom: 300px; 
         }
 
         .container {
-            width: 95%;
-            max-width: 600px;
-            margin-top: 30px;
+            width: 100%; /* 手機版佔滿 */
+            max-width: 600px; /* 電腦版最大寬度 */
+            margin-top: 20px;
+            padding: 0 15px; /* 容器左右留一點點緩衝 */
         }
 
         h1 {
             text-align: center;
             color: var(--deep-purple);
             text-shadow: 1px 1px 2px white;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
         }
 
         .section {
             background: var(--soft-white);
             border-radius: 15px;
-            padding: 25px 20px;
-            margin-bottom: 40px; 
+            /* 電腦版預設間距 */
+            padding: 25px 25px; 
+            margin-bottom: 30px; 
             box-shadow: 0 6px 15px rgba(0,0,0,0.05);
-            /* 確保 section 也有層級，但比角色低 */
             position: relative;
             z-index: 1;
         }
@@ -54,7 +60,7 @@
             border-left: 4px solid var(--deep-purple);
             padding-left: 10px;
             margin-top: 0;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
 
         .input-group {
@@ -69,11 +75,13 @@
             border-radius: 5px;
             flex-grow: 1;
             font-family: inherit;
+            min-width: 0; /* 防止輸入框在小螢幕撐爆 */
         }
 
         button {
             cursor: pointer;
             transition: 0.2s;
+            white-space: nowrap; /* 防止按鈕文字換行 */
         }
 
         .add-btn {
@@ -103,6 +111,7 @@
             border-radius: 3px;
             padding: 4px 10px;
             font-size: 0.8rem;
+            margin-left: 5px;
         }
 
         .today-highlight {
@@ -119,14 +128,14 @@
         .mood-group {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
+            gap: 10px;
         }
         .mood-btn {
             border: 1px solid var(--deep-purple);
             background: white;
-            padding: 10px;
+            padding: 8px 5px;
             border-radius: 10px;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -134,11 +143,9 @@
         }
         .mood-btn:hover { 
             background: var(--star-purple); 
-            transform: translateY(-2px);
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
 
-        /* --- 月曆樣式重新設計 --- */
+        /* --- 月曆樣式 --- */
         .calendar-header {
             display: flex;
             justify-content: space-between;
@@ -147,18 +154,17 @@
             font-weight: bold;
             color: var(--deep-purple);
             font-size: 1.1rem;
-            padding: 0 10px;
+            padding: 0 5px;
         }
         
-        /* 統一的網格容器 */
         .calendar-grid-container {
             display: grid;
-            grid-template-columns: repeat(7, 1fr); /* 強制切分7等份 */
-            gap: 6px;
+            grid-template-columns: repeat(7, 1fr); 
+            /* 電腦版間距 */
+            gap: 6px; 
             text-align: center;
         }
 
-        /* 通用的格子樣式 */
         .grid-cell {
             display: flex;
             align-items: center;
@@ -168,28 +174,21 @@
             position: relative;
         }
 
-        /* 星期標題的特殊樣式 */
         .grid-cell--header {
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             color: #888;
             font-weight: bold;
             padding-bottom: 8px;
-            align-items: flex-end; /* 文字靠下對齊 */
-            height: auto; /* 標題不需要正方形 */
+            align-items: flex-end;
+            height: auto;
         }
 
-        /* 日期格子的特殊樣式 */
         .grid-cell--day {
             background: rgba(255,255,255,0.6);
-            aspect-ratio: 1; /* 強制保持正方形 */
-            flex-direction: column; /* 讓日期和表情垂直排列 */
+            aspect-ratio: 1; 
+            flex-direction: column; 
             border: 1px solid transparent;
             transition: all 0.2s;
-        }
-
-        .grid-cell--day:not(.empty):hover {
-            background: white;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
 
         .grid-cell--day.today {
@@ -199,16 +198,10 @@
             color: var(--deep-purple);
         }
 
-        .grid-cell--day.empty {
-            background: transparent;
-            pointer-events: none;
-        }
-
         .mood-icon {
-            font-size: 1.2rem;
-            margin-top: 4px;
+            font-size: 1.1rem;
+            margin-top: 2px;
         }
-        /* -------------------- */
 
         .random-box {
             background: #fff;
@@ -224,22 +217,21 @@
             line-height: 1.5;
         }
 
-        /* --- 沈星回區域修正 --- */
+        /* --- 沈星回區域 --- */
         .character-zone {
             position: fixed;
-            left: 20px;
+            left: 15px;
             bottom: 20px;
             display: flex;
             align-items: flex-end;
             pointer-events: none;
-            /* 關鍵修改：提高層級，確保不被覆蓋 */
-            z-index: 9999;
+            z-index: 9999; /* 最高層級 */
         }
 
         .avatar {
+            /* 電腦版尺寸 */
             width: 110px;
             height: 110px;
-            /* 請確認這裡的圖片檔名是否正確，需與 GitHub 上一致 */
             background-image: url('1234.jpg'); 
             background-size: cover;
             background-position: center;
@@ -256,17 +248,17 @@
         .bubble {
             background: white;
             border: 2px solid var(--deep-purple);
-            padding: 12px 18px;
+            padding: 10px 15px;
             border-radius: 15px;
-            margin-bottom: 60px;
-            margin-left: 15px;
-            max-width: 220px;
+            margin-bottom: 50px; /* 讓對話框高一點 */
+            margin-left: 10px;
+            max-width: 200px;
             position: relative;
             box-shadow: 2px 2px 10px rgba(0,0,0,0.1);
             opacity: 0;
             transition: opacity 0.3s;
-            font-size: 0.95rem;
-            line-height: 1.5;
+            font-size: 0.9rem;
+            line-height: 1.4;
         }
 
         .bubble::after {
@@ -288,6 +280,53 @@
             border-style: solid;
             border-color: transparent var(--deep-purple) transparent transparent;
             z-index: -1;
+        }
+
+        /* ========================================= */
+        /* ★★★ 手機版專用調整 (Media Query) ★★★ */
+        /* ========================================= */
+        @media (max-width: 480px) {
+            /* 1. 減少區塊內距，把空間留給內容 */
+            .section {
+                padding: 20px 12px; 
+            }
+
+            /* 2. 縮小月曆格子間距 */
+            .calendar-grid-container {
+                gap: 3px; 
+            }
+
+            /* 3. 稍微縮小格子內文字與圖示 */
+            .grid-cell {
+                font-size: 0.8rem;
+                border-radius: 5px;
+            }
+            .mood-icon {
+                font-size: 0.9rem;
+            }
+
+            /* 4. 縮小沈星回頭像，避免擋住太多畫面 */
+            .avatar {
+                width: 85px;
+                height: 85px;
+                border-width: 3px;
+            }
+            
+            /* 5. 調整心情按鈕間距 */
+            .mood-group {
+                gap: 6px;
+            }
+            .mood-btn {
+                font-size: 0.8rem;
+                padding: 8px 2px;
+            }
+
+            /* 6. 調整對話框位置 */
+            .bubble {
+                margin-bottom: 40px;
+                max-width: 160px;
+                font-size: 0.85rem;
+            }
         }
     </style>
 </head>
@@ -340,9 +379,9 @@
     <div class="section">
         <h2>心情月曆</h2>
         <div class="calendar-header">
-            <button class="add-btn" style="padding: 2px 10px; font-size: 1.2rem;" onclick="changeMonth(-1)">❮</button>
-            <span id="calendarMonthYear" style="min-width: 120px; text-align: center;"></span>
-            <button class="add-btn" style="padding: 2px 10px; font-size: 1.2rem;" onclick="changeMonth(1)">❯</button>
+            <button class="add-btn" style="padding: 2px 12px; font-size: 1.1rem;" onclick="changeMonth(-1)">❮</button>
+            <span id="calendarMonthYear" style="min-width: 100px; text-align: center;"></span>
+            <button class="add-btn" style="padding: 2px 12px; font-size: 1.1rem;" onclick="changeMonth(1)">❯</button>
         </div>
         
         <div class="calendar-grid-container" id="calendarBody"></div>
@@ -376,7 +415,7 @@
     };
 
     const dialogues = {
-        touch: ["嗯... 妳在找我嗎？", "別擔心，我一直都在妳身邊。", "光芒會指引妳前進的方向。", "想去哪裡？我陪妳。"],
+        touch: ["嗯... 妳在找我嗎？", "別擔心，我一直都在妳身邊。", "光芒會指引妳前進的方向。", "想去哪裡？我陪妳。", "手給我，別走丟了。"],
         add: ["新的計劃嗎？我會陪妳一起完成的。", "記好了，這件事對妳很重要對吧？"],
         complete: ["妳做得很好，辛苦了。", "妳果然很出色，要給妳一點獎勵嗎？"],
         "開心": ["看到妳這麼開心，光芒好像都變亮了。", "只要妳高興，我也會覺得心情很好。"],
@@ -532,7 +571,7 @@
     function renderList() {
         document.getElementById('dailyList').innerHTML = dailyTasks.map((t, i) => `
             <div class="task-item">
-                <label class="${t.completed ? 'completed' : ''}" style="cursor:pointer;">
+                <label class="${t.completed ? 'completed' : ''}" style="cursor:pointer; flex-grow:1;">
                     <input type="checkbox" ${t.completed ? 'checked' : ''} onchange="toggleTask(${i})">
                     ${t.text}
                 </label>
