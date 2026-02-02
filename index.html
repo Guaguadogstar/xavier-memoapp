@@ -9,7 +9,7 @@
             --star-purple: #e0d7ff;
             --deep-purple: #9a8cff;
             --text-color: #4a4a4a;
-            --soft-white: rgba(255, 255, 255, 0.85);
+            --soft-white: rgba(255, 255, 255, 0.95); /* 稍微增加不透明度 */
         }
 
         body {
@@ -20,13 +20,12 @@
             display: flex;
             justify-content: center;
             min-height: 100vh;
-            /* 修改重點：大幅增加底部留白至 500px，確保月曆絕對不會被擋住 */
             padding-bottom: 550px; 
         }
 
         .container {
             width: 95%;
-            max-width: 500px;
+            max-width: 600px;
             margin-top: 30px;
         }
 
@@ -40,9 +39,8 @@
         .section {
             background: var(--soft-white);
             border-radius: 15px;
-            padding: 20px;
-            /* 修改重點：增加區塊間距，拉長網站視覺 */
-            margin-bottom: 50px; 
+            padding: 25px 20px; /* 增加上下內距 */
+            margin-bottom: 40px; 
             box-shadow: 0 6px 15px rgba(0,0,0,0.05);
             backdrop-filter: blur(5px);
         }
@@ -52,7 +50,7 @@
             border-left: 4px solid var(--deep-purple);
             padding-left: 10px;
             margin-top: 0;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
         }
 
         .input-group {
@@ -111,63 +109,94 @@
 
         /* 心情按鈕區 */
         .mood-selector {
-            margin-bottom: 15px;
+            margin-bottom: 20px;
+            text-align: center;
         }
         .mood-group {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
+            gap: 12px;
         }
         .mood-btn {
             border: 1px solid var(--deep-purple);
             background: white;
-            padding: 8px;
-            border-radius: 8px;
+            padding: 10px;
+            border-radius: 10px;
             font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
         }
         .mood-btn:hover { 
             background: var(--star-purple); 
             transform: translateY(-2px);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
 
-        /* 月曆樣式 */
+        /* --- 月曆樣式修正區 --- */
         .calendar-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
             font-weight: bold;
             color: var(--deep-purple);
+            font-size: 1.1rem;
+            padding: 0 10px;
         }
-        .calendar-grid {
+        
+        /* 統一 Grid 設定 */
+        .calendar-grid-container {
             display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 5px;
+            grid-template-columns: repeat(7, 1fr); /* 強制切分7等份 */
+            gap: 6px;
             text-align: center;
         }
+
         .calendar-day-header {
-            font-size: 0.8rem;
+            font-size: 0.9rem;
             color: #888;
-            padding-bottom: 5px;
+            padding-bottom: 8px;
+            font-weight: bold;
         }
+
         .calendar-cell {
-            background: rgba(255,255,255,0.5);
+            background: rgba(255,255,255,0.6);
             aspect-ratio: 1; /* 保持正方形 */
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            border-radius: 5px;
-            font-size: 0.8rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
             position: relative;
+            transition: all 0.2s;
+            border: 1px solid transparent; /* 預留邊框空間 */
         }
+
+        .calendar-cell:not(.empty):hover {
+            background: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
         .calendar-cell.today {
             border: 2px solid var(--deep-purple);
+            background: white;
+            font-weight: bold;
+            color: var(--deep-purple);
         }
+
+        .calendar-cell.empty {
+            background: transparent; /* 空白日透明 */
+            pointer-events: none;    /* 不可點擊 */
+        }
+
         .mood-icon {
             font-size: 1.2rem;
-            margin-top: 2px;
+            margin-top: 4px;
         }
+        /* -------------------- */
 
         .random-box {
             background: #fff;
@@ -197,6 +226,7 @@
         .avatar {
             width: 110px;
             height: 110px;
+            /* 請確保圖片路徑正確，或替換成您的圖片 */
             background-image: url('1234.jpg'); 
             background-size: cover;
             background-position: center;
@@ -235,6 +265,18 @@
             border-style: solid;
             border-color: transparent white transparent transparent;
         }
+        
+        /* 為了讓月曆邊框更好看 */
+        .bubble::before {
+            content: '';
+            position: absolute;
+            left: -13px;
+            bottom: 15px;
+            border-width: 10px 10px 10px 0;
+            border-style: solid;
+            border-color: transparent var(--deep-purple) transparent transparent;
+            z-index: -1;
+        }
     </style>
 </head>
 <body>
@@ -270,8 +312,8 @@
     <div class="section">
         <h2>心情記錄</h2>
         <div class="mood-selector">
-            <label style="font-size:0.9rem; color:#666;">選擇日期：</label>
-            <input type="date" id="moodDate" style="margin-bottom: 10px;">
+            <label style="font-size:0.95rem; color:#555; font-weight:bold;">📅 選擇日期：</label>
+            <input type="date" id="moodDate" style="padding: 5px 10px; margin-left:5px;">
         </div>
         <div class="mood-group">
             <button class="mood-btn" onclick="recordMood('開心')">😊 開心</button>
@@ -286,11 +328,12 @@
     <div class="section">
         <h2>心情月曆</h2>
         <div class="calendar-header">
-            <button class="add-btn" style="padding: 2px 8px;" onclick="changeMonth(-1)">❮</button>
-            <span id="calendarMonthYear"></span>
-            <button class="add-btn" style="padding: 2px 8px;" onclick="changeMonth(1)">❯</button>
+            <button class="add-btn" style="padding: 2px 10px; font-size: 1.2rem;" onclick="changeMonth(-1)">❮</button>
+            <span id="calendarMonthYear" style="min-width: 120px; text-align: center;"></span>
+            <button class="add-btn" style="padding: 2px 10px; font-size: 1.2rem;" onclick="changeMonth(1)">❯</button>
         </div>
-        <div class="calendar-grid">
+        
+        <div class="calendar-grid-container">
             <div class="calendar-day-header">日</div>
             <div class="calendar-day-header">一</div>
             <div class="calendar-day-header">二</div>
@@ -299,7 +342,8 @@
             <div class="calendar-day-header">五</div>
             <div class="calendar-day-header">六</div>
         </div>
-        <div class="calendar-grid" id="calendarBody"></div>
+        
+        <div class="calendar-grid-container" id="calendarBody"></div>
     </div>
 </div>
 
@@ -312,7 +356,7 @@
     // 資料初始化
     let dailyTasks = JSON.parse(localStorage.getItem('dailyTasks')) || [];
     let countdowns = JSON.parse(localStorage.getItem('countdowns')) || [];
-    let moodHistory = JSON.parse(localStorage.getItem('moodHistory')) || {}; // 格式: { "2023-10-01": "開心" }
+    let moodHistory = JSON.parse(localStorage.getItem('moodHistory')) || {}; 
 
     // 當前月曆顯示的日期
     let currentCalendarDate = new Date();
@@ -370,7 +414,10 @@
 
     function recordMood(mood) {
         const dateInput = document.getElementById('moodDate').value;
-        if (!dateInput) return;
+        if (!dateInput) {
+            alert("請先選擇日期喔！");
+            return;
+        }
 
         // 儲存心情
         moodHistory[dateInput] = mood;
@@ -397,9 +444,10 @@
         const calendarBody = document.getElementById('calendarBody');
         calendarBody.innerHTML = '';
 
-        // 填充空白日
+        // 修正重點：填充空白日 (必須有 class 才能正確佔位)
         for (let i = 0; i < firstDay; i++) {
-            calendarBody.innerHTML += `<div></div>`;
+            // 加入 empty class 讓 CSS 處理隱藏與佔位
+            calendarBody.innerHTML += `<div class="calendar-cell empty"></div>`;
         }
 
         // 填充日期
@@ -483,7 +531,7 @@
         // 每日任務
         document.getElementById('dailyList').innerHTML = dailyTasks.map((t, i) => `
             <div class="task-item">
-                <label class="${t.completed ? 'completed' : ''}">
+                <label class="${t.completed ? 'completed' : ''}" style="cursor:pointer;">
                     <input type="checkbox" ${t.completed ? 'checked' : ''} onchange="toggleTask(${i})">
                     ${t.text}
                 </label>
