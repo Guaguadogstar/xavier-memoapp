@@ -13,6 +13,7 @@
             --deep-purple: #9a8cff;
             --text-color: #4a4a4a;
             --soft-white: rgba(255, 255, 255, 0.98); 
+            --expire-red: #ff6b6b; /* 過期紅色 */
         }
 
         body {
@@ -74,6 +75,12 @@
             min-width: 0;
         }
 
+        /* 讓日期輸入框在小目標區塊可以稍微窄一點，把空間留給文字 */
+        .date-input-short {
+            flex-grow: 0;
+            width: 130px; 
+        }
+
         button {
             cursor: pointer;
             transition: 0.2s;
@@ -98,8 +105,24 @@
             border-bottom: 1px dashed #ccc;
         }
 
-        .completed { text-decoration: line-through; color: #888; }
+        /* 任務文字區塊 */
+        .task-label {
+            cursor: pointer;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column; /* 讓日期顯示在文字下方或旁邊 */
+            line-height: 1.4;
+        }
 
+        .task-meta {
+            font-size: 0.85rem;
+            color: #888;
+            margin-top: 2px;
+        }
+
+        .completed .task-text { text-decoration: line-through; color: #888; }
+        .expired { color: var(--expire-red); font-weight: bold; }
+        
         .delete-btn {
             background: #ff8b8b;
             color: white;
@@ -107,7 +130,7 @@
             border-radius: 3px;
             padding: 4px 10px;
             font-size: 0.8rem;
-            margin-left: 5px;
+            margin-left: 8px;
         }
 
         .today-highlight {
@@ -281,6 +304,7 @@
             .mood-group { gap: 6px; }
             .mood-btn { font-size: 0.8rem; padding: 8px 2px; }
             .bubble { margin-bottom: 40px; max-width: 160px; font-size: 0.85rem; }
+            .date-input-short { width: 110px; } /* 手機版日期輸入框再小一點 */
         }
     </style>
 </head>
@@ -305,16 +329,17 @@
     </div>
 
     <div class="section">
-        <h2>小目標</h2>
+        <h2>小目標 (含截止日期)</h2>
         <div class="input-group">
-            <input type="text" id="oneTimeInput" placeholder="輸入待完成的目標...">
+            <input type="text" id="oneTimeInput" placeholder="輸入目標...">
+            <input type="date" id="oneTimeDate" class="date-input-short">
             <button class="add-btn" onclick="addOneTimeTask()">新增</button>
         </div>
         <div id="oneTimeList"></div>
     </div>
 
     <div class="section">
-        <h2>週年倒數</h2>
+        <h2>週年倒數 (依日期排序)</h2>
         <div class="input-group">
             <input type="text" id="countName" placeholder="紀念日名稱...">
             <input type="date" id="countDate">
@@ -367,9 +392,9 @@
     // 檢查是否跨日，如果是，重置「每日目標」的打勾狀態
     const todayStr = new Date().toDateString();
     if (lastVisitDate !== todayStr) {
-        repeatTasks.forEach(task => task.completed = false); // 重置完成狀態
+        repeatTasks.forEach(task => task.completed = false); 
         localStorage.setItem('repeatTasks', JSON.stringify(repeatTasks));
-        localStorage.setItem('lastVisitDate', todayStr); // 更新最後訪問日期
+        localStorage.setItem('lastVisitDate', todayStr); 
     }
 
     // 當前月曆顯示的日期
@@ -377,6 +402,8 @@
 
     // 預設心情日期為今天
     document.getElementById('moodDate').valueAsDate = new Date();
+    // 預設小目標日期為今天 (非必須，看個人習慣)
+    // document.getElementById('oneTimeDate').valueAsDate = new Date();
 
     const moodIcons = {
         "開心": "😊", "興奮": "🤩", "難過": "😢",
@@ -385,8 +412,8 @@
 
     const dialogues = {
         touch: ["嗯... 妳在找我嗎？", "別擔心，我一直都在妳身邊。", "光芒會指引妳前進的方向。", "想去哪裡？我陪妳。", "手給我，別走丟了。"],
-        add: ["新的計劃嗎？我會陪妳一起完成的。", "記好了，這件事對妳很重要對吧？"],
-        complete: ["妳做得很好，辛苦了。", "妳果然很出色，要給妳一點獎勵嗎？"],
+        add: ["新的計劃嗎？我會陪妳一起完成的。", "記好了，這件事對妳很重要對吧？", "不要給自己太大壓力，慢慢來。"],
+        complete: ["妳做得很好，辛苦了。", "妳果然很出色，要給妳一點獎勵嗎？", "完成了一個目標，真棒。"],
         "開心": ["看到妳這麼開心，光芒好像都變亮了。", "只要妳高興，我也會覺得心情很好。"],
         "興奮": ["發生什麼好事了？慢慢說，我聽著。", "妳眼睛裡有星星在閃。"],
         "難過": ["想哭就哭吧，我在，不會離開。", "沒事的，我會一直陪著妳，直到妳好起來。"],
@@ -471,18 +498,35 @@
         saySomething('add');
     }
 
+    // 輔助函式：計算某個紀念日距離現在的毫秒數（用於排序）
+    function getNextCountdownTime(item) {
+        const now = new Date();
+        const currentYear = now.getFullYear();
+        let target = new Date(currentYear, item.month - 1, item.day);
+        // 如果今年已經過了，就看明年
+        if (target.setHours(0,0,0,0) < now.setHours(0,0,0,0)) {
+            target = new Date(currentYear + 1, item.month - 1, item.day);
+        }
+        return target.getTime();
+    }
+
     function addCountdown() {
         const name = document.getElementById('countName');
         const dateInput = document.getElementById('countDate');
         if (!name.value || !dateInput.value) return;
         const dateObj = new Date(dateInput.value);
-        countdowns.push({ name: name.value, month: dateObj.getMonth() + 1, day: dateObj.getDate() });
+        
+        countdowns.push({ 
+            name: name.value, 
+            month: dateObj.getMonth() + 1, 
+            day: dateObj.getDate() 
+        });
+        
         name.value = ''; dateInput.value = '';
         saySomething('countdown');
-        saveAndRender();
+        saveAndRender(); // 儲存時會觸發排序
     }
 
-    // 新增每日目標 (重複)
     function addRepeatTask() {
         const input = document.getElementById('repeatInput');
         if (!input.value) return;
@@ -492,17 +536,24 @@
         saveAndRender();
     }
 
-    // 新增小目標 (一次性)
+    // 新增小目標 (含日期)
     function addOneTimeTask() {
         const input = document.getElementById('oneTimeInput');
+        const dateInput = document.getElementById('oneTimeDate');
         if (!input.value) return;
-        oneTimeTasks.push({ text: input.value, completed: false });
-        input.value = '';
+        
+        oneTimeTasks.push({ 
+            text: input.value, 
+            completed: false,
+            deadline: dateInput.value || null // 儲存日期字串 (YYYY-MM-DD)
+        });
+        
+        input.value = ''; 
+        dateInput.value = '';
         saySomething('add');
         saveAndRender();
     }
 
-    // 切換狀態通用函數
     function toggleTask(type, index) {
         if (type === 'repeat') {
             repeatTasks[index].completed = !repeatTasks[index].completed;
@@ -522,6 +573,12 @@
     }
 
     function saveAndRender() {
+        // --- 自動排序邏輯 ---
+        // 依據距離今天最近的日子進行排序
+        countdowns.sort((a, b) => {
+            return getNextCountdownTime(a) - getNextCountdownTime(b);
+        });
+
         localStorage.setItem('repeatTasks', JSON.stringify(repeatTasks));
         localStorage.setItem('oneTimeTasks', JSON.stringify(oneTimeTasks));
         localStorage.setItem('countdowns', JSON.stringify(countdowns));
@@ -529,29 +586,57 @@
     }
 
     function renderList() {
-        // 渲染每日目標
+        // 1. 每日目標
         document.getElementById('repeatList').innerHTML = repeatTasks.map((t, i) => `
             <div class="task-item">
-                <label class="${t.completed ? 'completed' : ''}" style="cursor:pointer; flex-grow:1;">
-                    <input type="checkbox" ${t.completed ? 'checked' : ''} onchange="toggleTask('repeat', ${i})">
-                    ${t.text}
+                <label class="task-label ${t.completed ? 'completed' : ''}" onclick="toggleTask('repeat', ${i})">
+                    <div style="display:flex; align-items:center;">
+                        <input type="checkbox" ${t.completed ? 'checked' : ''} style="margin-right:8px; pointer-events:none;">
+                        <span class="task-text">${t.text}</span>
+                    </div>
                 </label>
                 <button class="delete-btn" onclick="deleteTask('repeat', ${i})">刪除</button>
             </div>
         `).join('');
 
-        // 渲染小目標
-        document.getElementById('oneTimeList').innerHTML = oneTimeTasks.map((t, i) => `
+        // 2. 小目標 (含過期檢查)
+        const today = new Date();
+        today.setHours(0,0,0,0);
+
+        document.getElementById('oneTimeList').innerHTML = oneTimeTasks.map((t, i) => {
+            let dateStatus = "";
+            let isExpired = false;
+
+            if (t.deadline) {
+                const deadlineDate = new Date(t.deadline);
+                // 顯示日期
+                dateStatus = `<span class="task-meta">📅 ${t.deadline.replace(/-/g, '/')}</span>`;
+                
+                // 檢查是否過期 (未完成 且 截止日 < 今天)
+                if (!t.completed && deadlineDate < today) {
+                    isExpired = true;
+                    dateStatus += ` <span style="color:var(--expire-red); margin-left:5px;">⚠️ 已過期</span>`;
+                }
+            }
+
+            // 如果過期，文字變紅 (除非已完成)
+            const textClass = t.completed ? 'completed' : (isExpired ? 'expired' : '');
+
+            return `
             <div class="task-item">
-                <label class="${t.completed ? 'completed' : ''}" style="cursor:pointer; flex-grow:1;">
-                    <input type="checkbox" ${t.completed ? 'checked' : ''} onchange="toggleTask('oneTime', ${i})">
-                    ${t.text}
+                <label class="task-label ${textClass}" onclick="toggleTask('oneTime', ${i})">
+                    <div style="display:flex; align-items:center;">
+                        <input type="checkbox" ${t.completed ? 'checked' : ''} style="margin-right:8px; pointer-events:none;">
+                        <span class="task-text">${t.text}</span>
+                    </div>
+                    ${dateStatus ? `<div style="padding-left: 24px;">${dateStatus}</div>` : ''}
                 </label>
                 <button class="delete-btn" onclick="deleteTask('oneTime', ${i})">刪除</button>
             </div>
-        `).join('');
+            `;
+        }).join('');
 
-        // 渲染倒數
+        // 3. 週年倒數 (已排序)
         const now = new Date();
         const currentYear = now.getFullYear();
         document.getElementById('countdownList').innerHTML = countdowns.map((c, i) => {
